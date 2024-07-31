@@ -1,4 +1,4 @@
-package com.pbhuy.identity_service;
+package com.pbhuy.identityservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
