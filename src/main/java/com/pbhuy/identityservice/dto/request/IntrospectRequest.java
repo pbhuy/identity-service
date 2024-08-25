@@ -1,4 +1,4 @@
-package com.pbhuy.identityservice.dto.response;
+package com.pbhuy.identityservice.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponse {
+public class IntrospectRequest {
     private String token;
-    private boolean authenticated;
 }

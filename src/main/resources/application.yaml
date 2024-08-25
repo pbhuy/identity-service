@@ -13,3 +13,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+jwt:
+  secretKey: "KzpX1FuyDVnns8zkFeKXo6lINb0hSM3qVkEeWRuF5UGCy7oI32fcJbRzQpfG5Jkk"
+
+bcrypt:
+  salt: 10

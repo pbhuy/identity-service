@@ -1,13 +1,18 @@
 package com.pbhuy.identityservice.controllers;
 
+import com.nimbusds.jose.JOSEException;
 import com.pbhuy.identityservice.dto.request.AuthRequest;
+import com.pbhuy.identityservice.dto.request.IntrospectRequest;
 import com.pbhuy.identityservice.dto.response.ApiResponse;
 import com.pbhuy.identityservice.dto.response.AuthResponse;
+import com.pbhuy.identityservice.dto.response.IntrospectResponse;
 import com.pbhuy.identityservice.services.AuthService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.text.ParseException;
 
 @RestController
 @RequestMapping("/auth")
@@ -18,13 +23,18 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/token")
     public ApiResponse<AuthResponse> login(@RequestBody AuthRequest request) {
-        boolean result = authService.authenticate(request);
-        AuthResponse authResponse = new AuthResponse();
-        authResponse.setAuthenticated(result);
         ApiResponse<AuthResponse> response = new ApiResponse<>();
-        response.setData(authResponse);
+        response.setData(authService.authenticate(request));
+        return response;
+    }
+
+    @PostMapping("/introspect")
+    public ApiResponse<IntrospectResponse> login(@RequestBody IntrospectRequest request)
+            throws ParseException, JOSEException {
+        ApiResponse<IntrospectResponse> response = new ApiResponse<>();
+        response.setData(authService.introspect(request));
         return response;
     }
 }

@@ -4,14 +4,17 @@ import com.pbhuy.identityservice.dto.request.UserCreationRequest;
 import com.pbhuy.identityservice.dto.request.UserUpdateRequest;
 import com.pbhuy.identityservice.dto.response.ApiResponse;
 import com.pbhuy.identityservice.dto.response.UserResponse;
-import com.pbhuy.identityservice.entities.User;
 import com.pbhuy.identityservice.services.UserService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -23,8 +26,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
-        ApiResponse<User> response = new ApiResponse<>();
+    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<UserResponse> response = new ApiResponse<>();
         response.setData(userService.createUser(request));
         return response;
     }
@@ -40,6 +43,13 @@ public class UserController {
     public ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
         ApiResponse<UserResponse> response = new ApiResponse<>();
         response.setData(userService.getUserById(userId));
+        return response;
+    }
+
+    @GetMapping("/profile")
+    public ApiResponse<UserResponse> getUserProfile() {
+        ApiResponse<UserResponse> response = new ApiResponse<>();
+        response.setData(userService.getUserProfile());
         return response;
     }
 
