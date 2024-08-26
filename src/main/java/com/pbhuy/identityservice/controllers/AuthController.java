@@ -7,6 +7,7 @@ import com.pbhuy.identityservice.dto.response.ApiResponse;
 import com.pbhuy.identityservice.dto.response.AuthResponse;
 import com.pbhuy.identityservice.dto.response.IntrospectResponse;
 import com.pbhuy.identityservice.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,14 +25,14 @@ public class AuthController {
     }
 
     @PostMapping("/token")
-    public ApiResponse<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ApiResponse<AuthResponse> login(@RequestBody @Valid AuthRequest request) {
         ApiResponse<AuthResponse> response = new ApiResponse<>();
         response.setData(authService.authenticate(request));
         return response;
     }
 
     @PostMapping("/introspect")
-    public ApiResponse<IntrospectResponse> login(@RequestBody IntrospectRequest request)
+    public ApiResponse<IntrospectResponse> introspect(@RequestBody @Valid IntrospectRequest request)
             throws ParseException, JOSEException {
         ApiResponse<IntrospectResponse> response = new ApiResponse<>();
         response.setData(authService.introspect(request));

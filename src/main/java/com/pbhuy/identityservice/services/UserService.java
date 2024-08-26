@@ -3,9 +3,9 @@ package com.pbhuy.identityservice.services;
 import com.pbhuy.identityservice.dto.request.UserCreationRequest;
 import com.pbhuy.identityservice.dto.request.UserUpdateRequest;
 import com.pbhuy.identityservice.dto.response.UserResponse;
+import com.pbhuy.identityservice.entities.Role;
 import com.pbhuy.identityservice.entities.User;
 import com.pbhuy.identityservice.enums.ErrorCode;
-import com.pbhuy.identityservice.enums.Role;
 import com.pbhuy.identityservice.exceptions.AppException;
 import com.pbhuy.identityservice.mappers.UserMapper;
 import com.pbhuy.identityservice.repositories.RoleRepository;
@@ -19,9 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -45,19 +43,15 @@ public class UserService {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
-//        user.setRoles(roles);
+        if (Objects.nonNull(request.getRoles())) {
+            List<Role> roles = roleRepository.findAllById(request.getRoles());
+            user.setRoles(new HashSet<>(roles));
+        }
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("Authentication : {}", authentication.getName());
-        authentication.getAuthorities().forEach(grantedAuthority -> {
-            log.info("GrantedAuthority : {}", grantedAuthority);
-        });
         List<UserResponse> responseList = new ArrayList<>();
         List<User> users = userRepository.findAll();
         for (User user : users) {
@@ -85,11 +79,13 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userMapper.updateUser(user, request);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        List<com.pbhuy.identityservice.entities.Role> roles = roleRepository.findAllById(request.getRoles());
-        user.setRoles(new HashSet<>(roles));
-
+        if (Objects.nonNull(request.getPassword())) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (Objects.nonNull(request.getRoles())) {
+            List<Role> roles = roleRepository.findAllById(request.getRoles());
+            user.setRoles(new HashSet<>(roles));
+        }
         return userMapper.toUserResponse(userRepository.save(user));
     }
 

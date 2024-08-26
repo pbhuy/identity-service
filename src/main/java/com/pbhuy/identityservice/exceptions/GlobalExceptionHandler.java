@@ -6,18 +6,21 @@ import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.validation.FieldError;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    private static final String ENTITY = "entity";
+
+    private static final String NOT_NULL = "NOT_NULL";
 
     private static final String MIN_ATTRIBUTE = "min";
     private static final String MISSING_FIELD = "field";
@@ -34,13 +37,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = AppException.class)
-    public ResponseEntity<ApiResponse<Void>> handelAppException(AppException e) {
+    public ResponseEntity<ApiResponse<Void>> handleAppException(AppException e) {
         ErrorCode errorCode = e.getErrorCode();
+        String entity = String.valueOf(errorCode).split("_")[0].toLowerCase();
+        log.info("Error code key: {}", StringUtils.capitalize(entity));
         ApiResponse<Void> response = new ApiResponse<>();
 
         response.setSuccess(false);
         response.setCode(errorCode.getCode());
-        response.setMessage(errorCode.getMessage());
+        String message = errorCode.getMessage();
+        response.setMessage(message.contains(ENTITY)
+                ? mapEntity(message, StringUtils.capitalize(entity))
+                : message);
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(response);
     }
@@ -66,7 +74,7 @@ public class GlobalExceptionHandler {
         String fieldError = "";
         try {
             errorCode = ErrorCode.valueOf(defaultMessage);
-            if ("NOT_NULL".equals(defaultMessage)) {
+            if (NOT_NULL.equals(defaultMessage)) {
                 fieldError = Objects.requireNonNull(e.getBindingResult().getFieldError()).getField();
             } else {
                 ConstraintViolation<?> constraintViolation = e.getBindingResult().getAllErrors().get(0).unwrap(ConstraintViolation.class);
@@ -96,5 +104,9 @@ public class GlobalExceptionHandler {
 
     private static String mapField(String message, String field) {
         return message.replace("{" + MISSING_FIELD + "}", field);
+    }
+
+    private static String mapEntity(String message, String entity) {
+        return message.replace("{" + ENTITY + "}", entity);
     }
 }
