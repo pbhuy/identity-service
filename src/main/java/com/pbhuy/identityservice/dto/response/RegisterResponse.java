@@ -1,6 +1,5 @@
 package com.pbhuy.identityservice.dto.response;
 
-import com.pbhuy.identityservice.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
