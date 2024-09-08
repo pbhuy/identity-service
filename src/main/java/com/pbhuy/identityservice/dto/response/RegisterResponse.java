@@ -1,5 +1,6 @@
 package com.pbhuy.identityservice.dto.response;
 
+import com.pbhuy.identityservice.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PermissionResponse {
-    private String name;
-    private String description;
+public class RegisterResponse {
+    private String token;
+    private UserResponse user;
 }

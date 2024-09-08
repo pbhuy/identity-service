@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionRequest {
-    @NotNull(message = "NOT_NULL")
-    private String name;
+public class PermissionUpdateRequest {
     @NotNull(message = "NOT_NULL")
     private String description;
 }

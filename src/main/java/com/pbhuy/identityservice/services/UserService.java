@@ -10,6 +10,7 @@ import com.pbhuy.identityservice.exceptions.AppException;
 import com.pbhuy.identityservice.mappers.UserMapper;
 import com.pbhuy.identityservice.repositories.RoleRepository;
 import com.pbhuy.identityservice.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -60,13 +61,15 @@ public class UserService {
         return responseList;
     }
 
-    @PostAuthorize("returnObject.username == authentication.name")
-    public UserResponse getUserById(String id) {
-        User user = userRepository.findById(id)
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse getUserById(String userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        log.info("in method getUserById from User Service {}", userId);
         return userMapper.toUserResponse(user);
     }
 
+    @PostAuthorize("returnObject.username == authentication.name")
     public UserResponse getUserProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -75,6 +78,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
+    @PreAuthorize("hasRole('USER')")
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -89,7 +93,12 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    public void deleteUser(String userId) {
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public UserResponse delete(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userRepository.deleteById(userId);
+        return userMapper.toUserResponse(user);
     }
 }

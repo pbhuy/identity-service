@@ -18,11 +18,8 @@ public class UserCreationRequest {
     @Size(min = 3, message = "INVALID_USERNAME")
     private String username;
 
-    @Email(regexp = "", message = "INVALID_EMAIL")
-    private String email;
-
     @NotNull(message = "NOT_NULL")
-    @Size(min = 6, message = "INVALID_PASSWORD")
+    @Size(min = 8, message = "INVALID_PASSWORD")
     private String password;
 
     @NotNull(message = "NOT_NULL")
@@ -32,7 +29,7 @@ public class UserCreationRequest {
     private String lastName;
 
     @NotNull(message = "NOT_NULL")
-    @Adult(min = 20, message = "INVALID_DOB")
+    @Adult(min = 18, message = "INVALID_DOB")
     private LocalDate dob;
 
     private List<String> roles;

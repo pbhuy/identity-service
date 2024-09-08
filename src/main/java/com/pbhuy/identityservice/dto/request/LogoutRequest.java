@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionRequest {
+public class LogoutRequest {
+
     @NotNull(message = "NOT_NULL")
-    private String name;
-    @NotNull(message = "NOT_NULL")
-    private String description;
+    private String token;
 }

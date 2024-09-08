@@ -3,7 +3,9 @@ package com.pbhuy.identityservice.exceptions;
 import com.pbhuy.identityservice.dto.response.ApiResponse;
 import com.pbhuy.identityservice.enums.ErrorCode;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.util.StringUtils;
@@ -11,8 +13,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 @ControllerAdvice
 @Slf4j
@@ -40,7 +44,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleAppException(AppException e) {
         ErrorCode errorCode = e.getErrorCode();
         String entity = String.valueOf(errorCode).split("_")[0].toLowerCase();
-        log.info("Error code key: {}", StringUtils.capitalize(entity));
         ApiResponse<Void> response = new ApiResponse<>();
 
         response.setSuccess(false);
@@ -57,12 +60,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handelAuthorizationDeniedException(AuthorizationDeniedException e) {
         ErrorCode errorCode = ErrorCode.FORBIDDEN;
 
-
         ApiResponse<Void> response = new ApiResponse<>();
         response.setSuccess(false);
         response.setCode(errorCode.getCode());
         response.setMessage(errorCode.getMessage());
         return ResponseEntity.status(errorCode.getStatusCode()).body(response);
+    }
+
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConstraintViolationException(ConstraintViolationException e) {
+        ErrorCode errorCode = ErrorCode.INVALID_MESSAGE_KEY;
+
+        String message = "";
+        for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+            String fieldName = violation.getPropertyPath().toString();
+            String errorMessage = violation.getMessage();
+            errorCode = ErrorCode.valueOf(errorMessage);
+            message = fieldName + ": " + errorCode.getMessage();
+        };
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .code(errorCode.getCode())
+                .message(message)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
@@ -88,8 +109,7 @@ public class GlobalExceptionHandler {
         String errorMessage = errorCode.getMessage();
         if ("NOT_NULL".equals(defaultMessage)) {
             errorMessage = mapField(errorMessage, fieldError);
-        }
-        else if (Objects.nonNull(attributes)) {
+        } else if (Objects.nonNull(attributes)) {
             errorMessage = mapAttribute(errorMessage, attributes);
         }
         response.setMessage(errorMessage);

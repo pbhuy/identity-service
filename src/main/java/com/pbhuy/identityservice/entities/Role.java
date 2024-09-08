@@ -1,26 +1,28 @@
 package com.pbhuy.identityservice.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Set;
 
 @Entity
-@Table(name = "roles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "roles")
 public class Role {
 
     @Id
     private String name;
     private String description;
 
-    @ManyToMany
-    Set<Permission> permissions;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+            @JoinTable(
+                    name = "roles_permissions",
+                    joinColumns = @JoinColumn(name = "role_name"),
+                    inverseJoinColumns = @JoinColumn(name = "permission_name")
+            )
+    private Set<Permission> permissions;
 }

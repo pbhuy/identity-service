@@ -5,12 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionRequest {
-    @NotNull(message = "NOT_NULL")
-    private String name;
+public class RoleUpdateRequest {
     @NotNull(message = "NOT_NULL")
     private String description;
+    @NotNull(message = "NOT_NULL")
+    private Set<String> permissions;
 }
